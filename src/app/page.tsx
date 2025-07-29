@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { FilterBar } from '@/components/filter-bar';
 import { ProductGrid } from '@/components/product-grid';
 import type { Product } from '@/lib/types';
-import { mockProducts } from '@/lib/mock-data';
+import { mockProducts, filterOptions } from '@/lib/mock-data';
 import { useDebounce } from '@/hooks/use-debounce';
 
 export default function Home() {
@@ -13,6 +13,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedClosure, setSelectedClosure] = useState('');
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -30,13 +32,17 @@ export default function Home() {
     return products.filter((product) => {
       const searchMatch = product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const sizeMatch = selectedSize ? product.size === selectedSize : true;
-      return searchMatch && sizeMatch;
+      const colorMatch = selectedColor ? product.color === selectedColor : true;
+      const closureMatch = selectedClosure ? product.closure === selectedClosure : true;
+      return searchMatch && sizeMatch && colorMatch && closureMatch;
     });
-  }, [products, debouncedSearchTerm, selectedSize]);
+  }, [products, debouncedSearchTerm, selectedSize, selectedColor, selectedClosure]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedSize('');
+    setSelectedColor('');
+    setSelectedClosure('');
   };
 
   return (
@@ -52,8 +58,13 @@ export default function Home() {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedSize={selectedSize}
-          onSizeChange={(size) => setSelectedSize(size === selectedSize ? '' : size)}
+          onSizeChange={setSelectedSize}
+          selectedColor={selectedColor}
+          onColorChange={setSelectedColor}
+          selectedClosure={selectedClosure}
+          onClosureChange={setSelectedClosure}
           onClearFilters={handleClearFilters}
+          filterOptions={filterOptions}
         />
         <ProductGrid products={filteredProducts} isLoading={isLoading} />
       </main>

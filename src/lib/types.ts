@@ -5,4 +5,13 @@ export interface Product {
   imageUrl: string;
   variations: number;
   description: string;
+  'data-ai-hint'?: string;
+  color?: string;
+  closure?: string;
+}
+
+export interface FilterOptions {
+  sizes: string[];
+  colors: string[];
+  closures: string[];
 }

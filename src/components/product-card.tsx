@@ -3,7 +3,7 @@ import type { Product } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Layers } from 'lucide-react';
+import { Layers, Droplet, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
@@ -29,7 +29,11 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">Size: {product.size}</CardDescription>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+          <span>Size: {product.size}</span>
+           {product.color && <span><Droplet className="inline-block mr-1 h-4 w-4" />{product.color}</span>}
+          {product.closure && product.closure !== 'None' && <span><Zap className="inline-block mr-1 h-4 w-4" />{product.closure}</span>}
+        </div>
         <p className="mt-2 text-sm text-foreground/80 line-clamp-2">{product.description}</p>
       </CardContent>
       <CardFooter className="p-4 pt-0 mt-auto">
