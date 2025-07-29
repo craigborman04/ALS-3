@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Layers, Droplet, Zap, TestTube2 } from 'lucide-react';
-import { VialIcon } from './vial-icon'; // Import the VialIcon
+import { VialIcon } from './vial-icon';
 
 interface ProductCardProps {
   product: Product;
