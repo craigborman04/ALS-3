@@ -11,13 +11,12 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  // Use the color from the product data, or a default if it's missing
   const vialColor = product.color_hex || '#E0E0E0';
 
   return (
     <Card className="flex flex-col overflow-hidden rounded-lg shadow-lg transition-all hover:shadow-xl animate-in fade-in duration-500">
-      <CardHeader className="p-4 relative bg-gray-50 flex items-center justify-center h-48">
-        <VialIcon color={vialColor} className="h-32 w-32" />
+      <CardHeader className="p-4 relative bg-gray-50 flex items-center justify-center h-56">
+        <VialIcon color={vialColor} className="h-48 w-auto" />
         <Badge variant="secondary" className="absolute top-2 right-2">
           <Layers className="mr-1 h-3 w-3" />
           {product.variations} Variations
