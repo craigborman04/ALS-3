@@ -6,11 +6,7 @@ import { FilterBar } from '../components/filter-bar';
 import { CardSkeleton } from '../components/card-skeleton';
 import { Product, ProductOption, FilterOptions } from '../lib/types';
 
-// Import fetchMockProducts
 import { fetchMockProducts } from '../lib/mock-data';
-
-// If you have a real API service, import it like this:
-// import { fetchProductsFromApi } from '../lib/api-service';
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -18,27 +14,20 @@ export default function Home() {
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Filter states
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
-  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
-          console.log('Using mock data...');
-          const data = await fetchMockProducts();
-          setAllProducts(data.products);
-          setAllOptions(data.options);
-          setFilterOptions(data.filterOptions);
-        } else {
-          console.log('Using real API data (or empty for now)...');
-          setAllProducts([]);
-          setAllOptions([]);
-          setFilterOptions({ sizes: []});
-        }
+        console.log('Using mock data...');
+        const data = await fetchMockProducts();
+        setAllProducts(data.products);
+        setAllOptions(data.options);
+        setFilterOptions(data.filterOptions);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {
@@ -49,7 +38,21 @@ export default function Home() {
     loadProducts();
   }, []);
 
-  // Filtered products logic
+  useEffect(() => {
+    if (selectedProduct) {
+      const productId = allProducts.find(p => p.name === selectedProduct)?.id;
+      if (productId) {
+        const colors = allOptions
+          .filter(option => option.product_id === productId && option.color)
+          .map(option => option.color);
+        setAvailableColors([...new Set(colors)]);
+      }
+    } else {
+      setAvailableColors([]);
+    }
+    setSelectedColor('');
+  }, [selectedProduct, allProducts, allOptions]);
+
   const filteredProducts = useMemo(() => {
     let currentProducts = allProducts;
 
@@ -58,32 +61,51 @@ export default function Home() {
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
+    
     if (selectedProduct) {
-      currentProducts = currentProducts.filter(product => product.name === selectedProduct);
-    }
-
-    // Filter by size based on product options
-    if (selectedSize) {
-      const filteredProductIds = new Set<string>();
-      allOptions.forEach(option => {
-        if (option.size === selectedSize) {
-          filteredProductIds.add(option.product_id);
+      const productId = allProducts.find(p => p.name === selectedProduct)?.id;
+      
+      if (productId) {
+        if (selectedColor) {
+           const productOption = allOptions.find(option => option.product_id === productId && option.color === selectedColor);
+           if(productOption) {
+            const baseProduct = allProducts.find(p => p.id === productId);
+            if(baseProduct) {
+              currentProducts = [{
+                ...baseProduct,
+                color_name: productOption.color,
+                color_hex: productOption.color_hex,
+                size: productOption.size
+              }];
+            } else {
+              currentProducts = [];
+            }
+           } else {
+             currentProducts = [];
+           }
+        } else {
+          // If a product is selected but no color, show the base product
+          const baseProduct = allProducts.find(p => p.id === productId);
+          currentProducts = baseProduct ? [baseProduct] : [];
         }
-      });
-
-      currentProducts = currentProducts.filter(product =>
-        filteredProductIds.has(product.id)
-      );
+      } else {
+        currentProducts = [];
+      }
+    } else if (selectedColor) {
+      // This case should ideally not happen without a product selected, but as a fallback:
+      const productIds = new Set(allOptions.filter(o => o.color === selectedColor).map(o => o.product_id));
+      currentProducts = allProducts.filter(p => productIds.has(p.id));
     }
+
 
     return currentProducts;
-  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedSize]);
+  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedColor]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedProduct('');
-    setSelectedSize('');
+    setSelectedColor('');
+    setAvailableColors([]);
   };
 
   return (
@@ -94,14 +116,18 @@ export default function Home() {
         onSearchChange={setSearchTerm}
         selectedProduct={selectedProduct}
         onProductChange={setSelectedProduct}
-        selectedSize={selectedSize}
-        onSizeChange={setSelectedSize}
+        selectedColor={selectedColor}
+        onColorChange={setSelectedColor}
+        availableColors={availableColors}
         onClearFilters={handleClearFilters}
-        filterOptions={filterOptions || { sizes: [] }}
-        products={allProducts} // Pass allProducts here
+        products={allProducts}
       />
       {loading ? (
-        <CardSkeleton />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
         <ProductGrid products={filteredProducts} isLoading={loading} />
       )}
