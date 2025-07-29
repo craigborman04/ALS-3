@@ -15,8 +15,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="flex flex-col overflow-hidden rounded-lg shadow-lg transition-all hover:shadow-xl animate-in fade-in duration-500">
-      <CardHeader className="p-4 relative bg-gray-50 flex items-center justify-center h-56">
-        <VialIcon color={vialColor} className="h-48 w-auto" />
+      <CardHeader className="p-4 relative bg-gray-50 flex items-center justify-center h-64">
+        <VialIcon color={vialColor} className="h-full w-auto" />
         <Badge variant="secondary" className="absolute top-2 right-2">
           <Layers className="mr-1 h-3 w-3" />
           {product.variations} Variations
