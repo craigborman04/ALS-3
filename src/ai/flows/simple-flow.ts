@@ -27,6 +27,16 @@ const simpleFlow = ai.defineFlow(
     const llmResponse = await ai.generate({
       prompt: prompt,
       model: 'googleai/gemini-pro',
+      history: [
+        {
+          role: 'user',
+          content: [{ text: 'You are a helpful assistant.' }],
+        },
+        {
+          role: 'model',
+          content: [{ text: 'OK' }],
+        },
+      ],
     });
 
     return llmResponse.text;
