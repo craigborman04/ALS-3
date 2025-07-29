@@ -1,99 +1,68 @@
 import type { Product, FilterOptions } from './types';
 
+// Data parsed from wp_als_products.csv and wp_als_product_options_simple.csv
 export const mockProducts: Product[] = [
   {
-    id: 'prod_001',
-    name: 'Sterile Centrifuge Tube',
-    size: '50ml',
-    color: 'Clear',
-    closure: 'Screw Cap',
-    imageUrl: 'https://placehold.co/600x400',
-    variations: 3,
-    description: 'Conical bottom, sterile, with a screw cap for secure sealing.',
-    'data-ai-hint': 'lab equipment'
-  },
-  {
-    id: 'prod_002',
-    name: 'Micro-Pipette Tips',
-    size: '200μl',
-    color: 'Yellow',
-    closure: 'None',
-    imageUrl: 'https://placehold.co/600x400',
-    variations: 2,
-    description: 'Universal fit, low retention, and certified RNase/DNase free.',
-    'data-ai-hint': 'lab equipment'
-  },
-  {
-    id: 'prod_003',
-    name: 'Glass Beaker',
-    size: '250ml',
-    color: 'Clear',
-    closure: 'None',
-    imageUrl: 'https://placehold.co/600x400',
-    variations: 1,
-    description: 'High-quality borosilicate glass with printed graduations.',
-    'data-ai-hint': 'glass beaker'
-  },
-  {
-    id: 'prod_004',
-    name: 'Petri Dishes, Polystyrene',
-    size: '90mm',
-    color: 'Clear',
-    closure: 'Lid',
-    imageUrl: 'https://placehold.co/600x400',
-    variations: 2,
-    description: 'Sterilized, disposable dishes perfect for cell culture.',
-    'data-ai-hint': 'petri dish'
-  },
-  {
-    id: 'prod_005',
-    name: 'Cryogenic Vials',
-    size: '2ml',
-    color: 'Amber',
-    closure: 'Internal Thread',
+    id: '1',
+    name: '1oz Vial',
+    size: '1oz',
+    color: 'Natural',
+    closure: 'Unlined Cap',
     imageUrl: 'https://placehold.co/600x400',
     variations: 4,
-    description: 'Self-standing vials with internal threads for secure storage.',
-    'data-ai-hint': 'lab vials'
+    description: 'A standard 1oz vial for various laboratory applications.',
+    'data-ai-hint': 'lab vial'
   },
   {
-    id: 'prod_006',
-    name: 'Erlenmeyer Flask',
-    size: '500ml',
-    color: 'Clear',
-    closure: 'Stopper',
+    id: '2',
+    name: '2oz Vial',
+    size: '2oz',
+    color: 'Natural',
+    closure: 'Unlined Cap',
     imageUrl: 'https://placehold.co/600x400',
-    variations: 1,
-    description: 'Narrow neck flask made from durable borosilicate glass.',
-    'data-ai-hint': 'lab flask'
+    variations: 4,
+    description: 'A standard 2oz vial, suitable for larger samples.',
+    'data-ai-hint': 'lab vial'
   },
   {
-    id: 'prod_007',
-    name: 'Latex Examination Gloves',
-    size: 'Medium',
-    color: 'Blue',
-    closure: 'None',
-    imageUrl: 'https://placehold.co/600x400',
-    variations: 3,
-    description: 'Powder-free, non-sterile gloves for general lab use.',
-    'data-ai-hint': 'latex gloves'
-  },
-  {
-    id: 'prod_008',
-    name: 'Volumetric Flask with Stopper',
-    size: '100ml',
-    color: 'Clear',
-    closure: 'Stopper',
+    id: '3',
+    name: '3oz Vial',
+    size: '3oz',
+    color: 'White',
+    closure: 'PTFE Lined Cap',
     imageUrl: 'https://placehold.co/600x400',
     variations: 2,
-    description: 'Class A, calibrated to contain, with a polyethylene stopper.',
-    'data-ai-hint': 'lab flask'
+    description: 'A 3oz vial with a PTFE lined cap for enhanced chemical resistance.',
+    'data-ai-hint': 'lab vial'
   },
+  {
+    id: '4',
+    name: '4oz Jar',
+    size: '4oz',
+    color: 'Clear',
+    closure: 'F217 Lined Cap',
+    imageUrl: 'https://placehold.co/600x400',
+    variations: 3,
+    description: 'A 4oz clear jar with a reliable F217 lined cap.',
+    'data-ai-hint': 'lab jar'
+  },
+  {
+    id: '5',
+    name: '8oz Jar',
+    size: '8oz',
+    color: 'Clear',
+    closure: 'Unlined Cap',
+    imageUrl: 'https://placehold.co/600x400',
+    variations: 3,
+    description: 'An 8oz clear jar for general purpose storage.',
+    'data-ai-hint': 'lab jar'
+  }
 ];
 
+// Data based on the unique values from products and their options.
 const productSizes = [...new Set(mockProducts.map((p) => p.size))].sort();
-const productColors = [...new Set(mockProducts.map((p) => p.color).filter(Boolean) as string[])].sort();
-const productClosures = [...new Set(mockProducts.map((p) => p.closure).filter(Boolean) as string[])].sort();
+const productColors = ["Natural", "White", "Clear"].sort();
+const productClosures = ["Unlined Cap", "PTFE Lined Cap", "F217 Lined Cap", "Orifice Reducer"].sort();
 
 
 export const filterOptions: FilterOptions = {
