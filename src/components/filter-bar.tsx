@@ -1,14 +1,17 @@
+
 "use client";
 
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { FilterOptions } from '@/lib/types';
+import type { FilterOptions, Product } from '@/lib/types';
 
 interface FilterBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  selectedProduct: string;
+  onProductChange: (value: string) => void;
   selectedSize: string;
   onSizeChange: (value: string) => void;
   selectedColor: string;
@@ -17,24 +20,26 @@ interface FilterBarProps {
   onClosureChange: (value: string) => void;
   onClearFilters: () => void;
   filterOptions: FilterOptions;
+  products: Product[];
 }
 
 export function FilterBar({
   searchTerm,
   onSearchChange,
+  selectedProduct,
+  onProductChange,
   selectedSize,
   onSizeChange,
   selectedColor,
   onColorChange,
-  selectedClosure,
-  onClosureChange,
   onClearFilters,
   filterOptions,
+  products
 }: FilterBarProps) {
   return (
     <div className="mb-8 p-4 bg-card rounded-lg shadow-sm border">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-        <div className="relative md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+        <div className="relative md:col-span-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by product name..."
@@ -44,14 +49,14 @@ export function FilterBar({
           />
         </div>
         <div className="md:col-span-1">
-          <Select value={selectedSize} onValueChange={onSizeChange}>
+          <Select value={selectedProduct} onValueChange={onProductChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Sizes" />
+              <SelectValue placeholder="All Products" />
             </SelectTrigger>
             <SelectContent>
-              {filterOptions.sizes.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
+              {products.map((product) => (
+                <SelectItem key={product.id} value={product.name}>
+                  {product.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -72,14 +77,14 @@ export function FilterBar({
           </Select>
         </div>
         <div className="md:col-span-1">
-          <Select value={selectedClosure} onValueChange={onClosureChange}>
+          <Select value={selectedSize} onValueChange={onSizeChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Closures" />
+              <SelectValue placeholder="All Sizes" />
             </SelectTrigger>
             <SelectContent>
-              {filterOptions.closures.map((closure) => (
-                <SelectItem key={closure} value={closure}>
-                  {closure}
+              {filterOptions.sizes.map((size) => (
+                <SelectItem key={size} value={size}>
+                  {size}
                 </SelectItem>
               ))}
             </SelectContent>

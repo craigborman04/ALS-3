@@ -1,27 +1,28 @@
-import Image from 'next/image';
+
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Layers, Droplet, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { VialIcon } from './vial-icon';
 
 interface ProductCardProps {
   product: Product;
 }
 
+const colorHexMap: { [key: string]: string } = {
+  'Natural': '#E0E0E0',
+  'White': '#FFFFFF',
+  'Clear': '#F0F8FF', // AliceBlue for a slightly off-white clear
+};
+
 export function ProductCard({ product }: ProductCardProps) {
+  const vialColor = product.color ? colorHexMap[product.color] || '#E0E0E0' : '#E0E0E0';
+  
   return (
     <Card className="flex flex-col overflow-hidden rounded-lg shadow-lg transition-all hover:shadow-xl animate-in fade-in duration-500">
-      <CardHeader className="p-0 relative">
-        <Image
-          src={product.imageUrl}
-          alt={product.name}
-          width={600}
-          height={400}
-          className="object-cover w-full h-48"
-          data-ai-hint={product['data-ai-hint']}
-        />
+      <CardHeader className="p-0 relative bg-gray-50 flex items-center justify-center h-48">
+        <VialIcon color={vialColor} className="w-24 h-24 text-gray-400" />
         <Badge variant="secondary" className="absolute top-2 right-2">
           <Layers className="mr-1 h-3 w-3" />
           {product.variations} Variations

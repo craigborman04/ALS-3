@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -14,4 +15,5 @@ export interface FilterOptions {
   sizes: string[];
   colors: string[];
   closures: string[];
+  products: string[];
 }

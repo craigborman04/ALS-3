@@ -12,6 +12,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedClosure, setSelectedClosure] = useState('');
@@ -31,15 +32,17 @@ export default function Home() {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const searchMatch = product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const productMatch = selectedProduct ? product.name === selectedProduct : true;
       const sizeMatch = selectedSize ? product.size === selectedSize : true;
       const colorMatch = selectedColor ? product.color === selectedColor : true;
       const closureMatch = selectedClosure ? product.closure === selectedClosure : true;
-      return searchMatch && sizeMatch && colorMatch && closureMatch;
+      return searchMatch && productMatch && sizeMatch && colorMatch && closureMatch;
     });
-  }, [products, debouncedSearchTerm, selectedSize, selectedColor, selectedClosure]);
+  }, [products, debouncedSearchTerm, selectedProduct, selectedSize, selectedColor, selectedClosure]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
+    setSelectedProduct('');
     setSelectedSize('');
     setSelectedColor('');
     setSelectedClosure('');
@@ -57,6 +60,8 @@ export default function Home() {
         <FilterBar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
+          selectedProduct={selectedProduct}
+          onProductChange={setSelectedProduct}
           selectedSize={selectedSize}
           onSizeChange={setSelectedSize}
           selectedColor={selectedColor}
@@ -65,6 +70,7 @@ export default function Home() {
           onClosureChange={setSelectedClosure}
           onClearFilters={handleClearFilters}
           filterOptions={filterOptions}
+          products={products}
         />
         <ProductGrid products={filteredProducts} isLoading={isLoading} />
       </main>
