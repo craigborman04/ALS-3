@@ -46,10 +46,9 @@ export function FilterBar({
         <div className="md:col-span-1">
           <Select value={selectedSize} onValueChange={onSizeChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by size" />
+              <SelectValue placeholder="All Sizes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Sizes</SelectItem>
               {filterOptions.sizes.map((size) => (
                 <SelectItem key={size} value={size}>
                   {size}
@@ -61,10 +60,9 @@ export function FilterBar({
         <div className="md:col-span-1">
           <Select value={selectedColor} onValueChange={onColorChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by color" />
+              <SelectValue placeholder="All Colors" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="">All Colors</SelectItem>
               {filterOptions.colors.map((color) => (
                 <SelectItem key={color} value={color}>
                   {color}
@@ -76,10 +74,9 @@ export function FilterBar({
         <div className="md:col-span-1">
           <Select value={selectedClosure} onValueChange={onClosureChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by closure" />
+              <SelectValue placeholder="All Closures" />
             </SelectTrigger>
             <SelectContent>
-                <SelectItem value="">All Closures</SelectItem>
               {filterOptions.closures.map((closure) => (
                 <SelectItem key={closure} value={closure}>
                   {closure}
