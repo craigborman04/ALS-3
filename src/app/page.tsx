@@ -22,8 +22,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
-  const [selectedColor, setSelectedColor] = useState<string>('');
-  const [selectedClosure, setSelectedClosure] = useState<string>('');
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -39,7 +37,7 @@ export default function Home() {
           console.log('Using real API data (or empty for now)...');
           setAllProducts([]);
           setAllOptions([]);
-          setFilterOptions({ sizes: [], closureTypes: [], colors: [] });
+          setFilterOptions({ sizes: []});
         }
       } catch (error) {
         console.error('Failed to fetch products:', error);
@@ -65,15 +63,11 @@ export default function Home() {
       currentProducts = currentProducts.filter(product => product.name === selectedProduct);
     }
 
-    // Filter by size, color, closure_type based on product options
-    if (selectedSize || selectedColor || selectedClosure) {
+    // Filter by size based on product options
+    if (selectedSize) {
       const filteredProductIds = new Set<string>();
       allOptions.forEach(option => {
-        const matchesSize = selectedSize ? option.size === selectedSize : true;
-        const matchesColor = selectedColor ? option.color === selectedColor : true;
-        const matchesClosure = selectedClosure ? option.closure_type === selectedClosure : true;
-
-        if (matchesSize && matchesColor && matchesClosure) {
+        if (option.size === selectedSize) {
           filteredProductIds.add(option.product_id);
         }
       });
@@ -84,14 +78,12 @@ export default function Home() {
     }
 
     return currentProducts;
-  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedSize, selectedColor, selectedClosure]);
+  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedSize]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedProduct('');
     setSelectedSize('');
-    setSelectedColor('');
-    setSelectedClosure('');
   };
 
   return (
@@ -104,12 +96,8 @@ export default function Home() {
         onProductChange={setSelectedProduct}
         selectedSize={selectedSize}
         onSizeChange={setSelectedSize}
-        selectedColor={selectedColor}
-        onColorChange={setSelectedColor}
-        selectedClosure={selectedClosure}
-        onClosureChange={setSelectedClosure}
         onClearFilters={handleClearFilters}
-        filterOptions={filterOptions || { sizes: [], closureTypes: [], colors: [] }}
+        filterOptions={filterOptions || { sizes: [] }}
         products={allProducts} // Pass allProducts here
       />
       {loading ? (

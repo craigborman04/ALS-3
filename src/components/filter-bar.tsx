@@ -13,10 +13,6 @@ interface FilterBarProps {
   onProductChange: (value: string) => void;
   selectedSize: string;
   onSizeChange: (value: string) => void;
-  selectedColor: string;
-  onColorChange: (value: string) => void;
-  selectedClosure: string;
-  onClosureChange: (value: string) => void;
   onClearFilters: () => void;
   filterOptions: FilterOptions;
   products: Product[];
@@ -29,10 +25,6 @@ export function FilterBar({
   onProductChange,
   selectedSize,
   onSizeChange,
-  selectedColor,
-  onColorChange,
-  selectedClosure,
-  onClosureChange,
   onClearFilters,
   filterOptions,
   products
@@ -67,42 +59,27 @@ export function FilterBar({
           </Select>
         </div>
         <div>
-           <label className="text-sm font-medium text-muted-foreground">Color</label>
-          <Select value={selectedColor} onValueChange={onColorChange}>
+          <label className="text-sm font-medium text-muted-foreground">Size</label>
+          <Select value={selectedSize} onValueChange={onSizeChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Colors" />
+              <SelectValue placeholder="All Sizes" />
             </SelectTrigger>
             <SelectContent>
-              {filterOptions.colors.map((color) => (
-                <SelectItem key={color} value={color}>
-                  {color}
+              {filterOptions.sizes.map((size) => (
+                <SelectItem key={size} value={size}>
+                  {size}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <label className="text-sm font-medium text-muted-foreground">Closure Type</label>
-          <Select value={selectedClosure} onValueChange={onClosureChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Closure Types" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.closureTypes.map((closureType) => (
-                <SelectItem key={closureType} value={closureType}>
-                  {closureType}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-       <div className="flex justify-end mt-4">
           <Button variant="ghost" onClick={onClearFilters} className="w-full md:w-auto">
             <X className="mr-2 h-4 w-4" />
             Clear Filters
           </Button>
         </div>
+      </div>
     </div>
   );
 }

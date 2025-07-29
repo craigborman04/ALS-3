@@ -29,20 +29,16 @@ const generateProductData = async () => {
     const productOptions = await readCsv<ProductOption>(productOptionsFilePath);
 
     const uniqueSizes = new Set<string>();
-    const uniqueClosureTypes = new Set<string>();
-    const uniqueColors = new Set<string>();
 
     productOptions.forEach(option => {
       if (option.size) uniqueSizes.add(option.size);
-      if (option.closure_type) uniqueClosureTypes.add(option.closure_type);
-      if (option.color) uniqueColors.add(option.color);
     });
 
     const productMap = new Map<string, Product>();
     products.forEach(p => productMap.set(p.id, p));
 
     const variationsCount: { [productId: string]: number } = {};
-    const productRepresentativeDetails: { [productId: string]: { size?: string; closure?: string } } = {};
+    const productRepresentativeDetails: { [productId: string]: { size?: string } } = {};
 
     productOptions.forEach(option => {
       variationsCount[option.product_id] = (variationsCount[option.product_id] || 0) + 1;
@@ -53,22 +49,16 @@ const generateProductData = async () => {
       if (!productRepresentativeDetails[option.product_id].size && option.size) {
         productRepresentativeDetails[option.product_id].size = option.size;
       }
-      if (!productRepresentativeDetails[option.product_id].closure && option.closure_type) {
-        productRepresentativeDetails[option.product_id].closure = option.closure_type;
-      }
     });
 
     const enrichedProducts: Product[] = products.map(product => ({
       ...product,
       variations: (variationsCount[product.id] || 0).toString(),
       size: productRepresentativeDetails[product.id]?.size || 'N/A',
-      closure: productRepresentativeDetails[product.id]?.closure || 'N/A',
     }));
 
     const filterOptions: FilterOptions = {
       sizes: Array.from(uniqueSizes).sort(),
-      closureTypes: Array.from(uniqueClosureTypes).sort(),
-      colors: Array.from(uniqueColors).sort(),
     };
 
     const processedData: ProcessedProductData = {
