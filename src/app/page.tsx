@@ -1,44 +1,90 @@
+'use client';
 
-"use client";
+import { useEffect, useState, useMemo } from 'react';
+import { ProductGrid } from '../components/product-grid';
+import { FilterBar } from '../components/filter-bar';
+import { CardSkeleton } from '../components/card-skeleton';
+import { Product, ProductOption, FilterOptions } from '../lib/types';
 
-import { useState, useEffect, useMemo } from 'react';
-import { FilterBar } from '@/components/filter-bar';
-import { ProductGrid } from '@/components/product-grid';
-import type { Product } from '@/lib/types';
-import { mockProducts, filterOptions } from '@/lib/mock-data';
-import { useDebounce } from '@/hooks/use-debounce';
+// Import fetchMockProducts
+import { fetchMockProducts } from '../lib/mock-data';
+
+// If you have a real API service, import it like this:
+// import { fetchProductsFromApi } from '../lib/api-service';
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedClosure, setSelectedClosure] = useState('');
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allOptions, setAllOptions] = useState<ProductOption[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedProduct, setSelectedProduct] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedClosure, setSelectedClosure] = useState<string>('');
 
   useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      setProducts(mockProducts);
-      setIsLoading(false);
-    }, 1000);
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
+          console.log('Using mock data...');
+          const data = await fetchMockProducts();
+          setAllProducts(data.products);
+          setAllOptions(data.options);
+          setFilterOptions(data.filterOptions);
+        } else {
+          console.log('Using real API data (or empty for now)...');
+          setAllProducts([]);
+          setAllOptions([]);
+          setFilterOptions({ sizes: [], closureTypes: [], colors: [] });
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadProducts();
   }, []);
 
+  // Filtered products logic
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const searchMatch = product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      const productMatch = selectedProduct ? product.name === selectedProduct : true;
-      const sizeMatch = selectedSize ? product.size === selectedSize : true;
-      const colorMatch = selectedColor ? product.color === selectedColor : true;
-      const closureMatch = selectedClosure ? product.closure === selectedClosure : true;
-      return searchMatch && productMatch && sizeMatch && colorMatch && closureMatch;
-    });
-  }, [products, debouncedSearchTerm, selectedProduct, selectedSize, selectedColor, selectedClosure]);
+    let currentProducts = allProducts;
+
+    if (searchTerm) {
+      currentProducts = currentProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedProduct) {
+      currentProducts = currentProducts.filter(product => product.name === selectedProduct);
+    }
+
+    // Filter by size, color, closure_type based on product options
+    if (selectedSize || selectedColor || selectedClosure) {
+      const filteredProductIds = new Set<string>();
+      allOptions.forEach(option => {
+        const matchesSize = selectedSize ? option.size === selectedSize : true;
+        const matchesColor = selectedColor ? option.color === selectedColor : true;
+        const matchesClosure = selectedClosure ? option.closure_type === selectedClosure : true;
+
+        if (matchesSize && matchesColor && matchesClosure) {
+          filteredProductIds.add(option.product_id);
+        }
+      });
+
+      currentProducts = currentProducts.filter(product =>
+        filteredProductIds.has(product.id)
+      );
+    }
+
+    return currentProducts;
+  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedSize, selectedColor, selectedClosure]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -49,36 +95,28 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
-      <header className="bg-card border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-primary font-headline">ALS Product Catalog</h1>
-          <p className="text-muted-foreground mt-1">Browse our extensive range of laboratory products.</p>
-        </div>
-      </header>
-      <main className="container mx-auto px-4 py-8">
-        <FilterBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedProduct={selectedProduct}
-          onProductChange={setSelectedProduct}
-          selectedSize={selectedSize}
-          onSizeChange={setSelectedSize}
-          selectedColor={selectedColor}
-          onColorChange={setSelectedColor}
-          selectedClosure={selectedClosure}
-          onClosureChange={setSelectedClosure}
-          onClearFilters={handleClearFilters}
-          filterOptions={filterOptions}
-          products={products}
-        />
-        <ProductGrid products={filteredProducts} isLoading={isLoading} />
-      </main>
-      <footer className="bg-card border-t mt-12 py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} ALS Laboratory. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    <main className="min-h-screen bg-gray-100 p-4">
+      <h1 className="text-4xl font-bold text-dna-online-blue mb-6">Product Catalog</h1>
+      <FilterBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedProduct={selectedProduct}
+        onProductChange={setSelectedProduct}
+        selectedSize={selectedSize}
+        onSizeChange={setSelectedSize}
+        selectedColor={selectedColor}
+        onColorChange={setSelectedColor}
+        selectedClosure={selectedClosure}
+        onClosureChange={setSelectedClosure}
+        onClearFilters={handleClearFilters}
+        filterOptions={filterOptions || { sizes: [], closureTypes: [], colors: [] }}
+        products={allProducts} // Pass allProducts here
+      />
+      {loading ? (
+        <CardSkeleton />
+      ) : (
+        <ProductGrid products={filteredProducts} isLoading={loading} />
+      )}
+    </main>
   );
 }

@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -83,15 +82,15 @@ export function FilterBar({
           </Select>
         </div>
         <div>
-          <label className="text-sm font-medium text-muted-foreground">Size</label>
-          <Select value={selectedSize} onValueChange={onSizeChange}>
+          <label className="text-sm font-medium text-muted-foreground">Closure Type</label>
+          <Select value={selectedClosure} onValueChange={onClosureChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Sizes" />
+              <SelectValue placeholder="All Closure Types" />
             </SelectTrigger>
             <SelectContent>
-              {filterOptions.sizes.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
+              {filterOptions.closureTypes.map((closureType) => (
+                <SelectItem key={closureType} value={closureType}>
+                  {closureType}
                 </SelectItem>
               ))}
             </SelectContent>
