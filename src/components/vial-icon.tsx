@@ -4,7 +4,7 @@ export function VialIcon({ color = "#E0E0E0", className }: { color?: string, cla
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 105 150"
+      viewBox="0 0 100 150"
       className={className}
       preserveAspectRatio="xMidYMid meet"
     >
@@ -14,7 +14,7 @@ export function VialIcon({ color = "#E0E0E0", className }: { color?: string, cla
           <stop offset="50%" stopColor="#F9FAFB" />
           <stop offset="100%" stopColor="#E5E7EB" />
         </linearGradient>
-        <filter id="liquid-glow" x="-50%" y="-50%" width="200%" height="200%">
+         <filter id="liquid-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
@@ -23,20 +23,18 @@ export function VialIcon({ color = "#E0E0E0", className }: { color?: string, cla
         </filter>
       </defs>
       
-      <g transform="rotate(-7 52.5 75)">
-        {/* Vial Body */}
-        <path d="M40,20 L65,20 C70,20 70,25 70,25 L70,138 C70,143 65,148 60,148 L45,148 C40,148 35,143 35,138 L35,25 C35,25 35,20 40,20 Z" fill="url(#vial-body-gradient)" stroke="#D1D5DB" strokeWidth="0.5"/>
-        
-        {/* Liquid Content */}
-        <path d="M37,50 L68,50 L68,138 C68,142 64,146 60,146 L45,146 C41,146 37,142 37,138 Z" fill={color} opacity="0.7" style={{filter: 'url(#liquid-glow)'}} />
-        
-        {/* Flip-top cap */}
-        <path d="M35,20 L70,20 L70,15 C70,10 65,5 60,5 L45,5 C40,5 35,10 35,15 Z" fill="#E5E7EB" stroke="#B0B0B0" strokeWidth="0.5"/>
-        <path d="M45,5 C45,2 60,2 60,5 L60,10 L45,10 Z" fill="#F0F0F0" stroke="#B0B0B0" strokeWidth="0.5" />
-        
-        {/* Reflection Highlight */}
-        <path d="M48,25 C50,55 50,105 48,135" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"/>
-      </g>
+      {/* Vial Body */}
+      <path d="M25,25 L75,25 L75,140 C75,145 70,150 65,150 L35,150 C30,150 25,145 25,140 Z" fill="url(#vial-body-gradient)" stroke="#D1D5DB" strokeWidth="0.5"/>
+      
+      {/* Liquid Content */}
+      <path d="M27,50 L73,50 L73,140 C73,144 69,148 65,148 L35,148 C31,148 27,144 27,140 Z" fill={color} opacity="0.7" style={{filter: 'url(#liquid-glow)'}} />
+      
+      {/* Flat Flip-top cap */}
+      <rect x="22" y="5" width="56" height="20" rx="5" fill="#F9FAFB" stroke="#B0B0B0" strokeWidth="0.5"/>
+      <line x1="22" y1="25" x2="78" y2="25" stroke="#B0B0B0" strokeWidth="0.5" />
+
+      {/* Reflection Highlight */}
+      <path d="M35,30 C37,60 37,110 35,140" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   );
 }
