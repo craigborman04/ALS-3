@@ -1,0 +1,15 @@
+"id","name","color_name","color_hex","color_description","category","tags","is_active","sort_order","created_at","updated_at","slug","description","image_url"
+"1","10 oz Laboratory Vial","Clear","#ffffff","Clear transparent laboratory vial","sample-vials","laboratory, custody, large, 10oz","1","0","2025-07-09 12:50:40","2025-07-18 10:24:15",,,NULL
+"2","8oz Laboratory Vial","Clear","#FFFFFF","Clear transparent 8oz laboratory vial","sample-vials","laboratory, 8oz, snap-seal","1","1","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"3","4oz Laboratory Vial","Clear","#FFFFFF","Clear transparent 4oz laboratory vial","sample-vials","laboratory, 4oz, versatile","1","2","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"4","3oz Laboratory Vial","Sky Blue","#87CEEB","Sky blue colored laboratory vial","sample-vials","laboratory, 3oz, colored, blue","1","3","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"5","2oz Laboratory Vial - Clear","Clear","#FFFFFF","Clear transparent 2oz laboratory vial","sample-vials","laboratory, 2oz, standard, clear","1","4","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"6","2oz Laboratory Vial - Red","Red","#FF0000","Red colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, red","1","5","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"7","2oz Laboratory Vial - Blue","Blue","#0000FF","Blue colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, blue","1","6","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"8","2oz Laboratory Vial - Yellow","Yellow","#FFFF00","Yellow colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, yellow","1","7","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"9","2oz Laboratory Vial - White","White","#FFFFFF","White colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, white","1","8","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"10","2oz Laboratory Vial - Purple","Purple","#800080","Purple colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, purple","1","9","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"11","2oz Laboratory Vial - Orange","Orange","#FFA500","Orange colored 2oz laboratory vial","sample-vials","laboratory, 2oz, colored, orange","1","10","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"12","45ml Urine Vial","Clear","#FFFFFF","Clear urine collection vial","sample-vials","urine, collection, custody, medical","1","11","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"13","12ml Veterinary Vial","Clear","#FFFFFF","Small veterinary sample vial","sample-vials","veterinary, small, flip-top, vet","1","12","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL
+"14","10ml Cornell Vial","Clear","#FFFFFF","Cornell style small sample vial","sample-vials","cornell, small, specialty, research","1","13","2025-07-09 12:50:40","2025-07-09 12:50:40",,NULL,NULL

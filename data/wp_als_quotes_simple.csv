@@ -1,0 +1,3 @@
+"id","product_id","product_name","size","closure_type","color","quantity","box_quantity","unit_price","total_price","currency","customer_name","customer_email","customer_phone","company_name","message","status","created_at","updated_at"
+"1","1","Laboratory Vial 2oz","2oz","Custody","Clear","2","100","30.00","60.00","ZAR","John Smith","john@example.com","+27123456789","ABC Laboratory","Need these for sample collection","pending","2025-07-18 12:09:48","2025-07-18 12:09:48"
+"2","2","Laboratory Vial 4oz","4oz","Lock Tab","Blue","1","250","39.00","39.00","ZAR","Sarah Johnson","sarah@lab.com","+27987654321","XYZ Research","Blue vials for chemical analysis","processing","2025-07-18 12:09:48","2025-07-18 12:09:48"
