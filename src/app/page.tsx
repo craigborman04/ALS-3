@@ -17,7 +17,10 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedClosureType, setSelectedClosureType] = useState<string>('');
+  
   const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [availableClosureTypes, setAvailableClosureTypes] = useState<string[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -42,15 +45,18 @@ export default function Home() {
     if (selectedProduct) {
       const productId = allProducts.find(p => p.name === selectedProduct)?.id;
       if (productId) {
-        const colors = allOptions
-          .filter(option => option.product_id === productId && option.color)
-          .map(option => option.color);
+        const productOptions = allOptions.filter(option => option.product_id === productId);
+        const colors = productOptions.map(option => option.color).filter(Boolean);
+        const closureTypes = productOptions.map(option => option.closure_type).filter(Boolean);
         setAvailableColors([...new Set(colors)]);
+        setAvailableClosureTypes([...new Set(closureTypes)]);
       }
     } else {
       setAvailableColors([]);
+      setAvailableClosureTypes([]);
     }
     setSelectedColor('');
+    setSelectedClosureType('');
   }, [selectedProduct, allProducts, allOptions]);
 
   const filteredProducts = useMemo(() => {
@@ -66,46 +72,57 @@ export default function Home() {
       const productId = allProducts.find(p => p.name === selectedProduct)?.id;
       
       if (productId) {
-        if (selectedColor) {
-           const productOption = allOptions.find(option => option.product_id === productId && option.color === selectedColor);
-           if(productOption) {
-            const baseProduct = allProducts.find(p => p.id === productId);
-            if(baseProduct) {
-              currentProducts = [{
-                ...baseProduct,
-                color_name: productOption.color,
-                color_hex: productOption.color_hex,
-                size: productOption.size
-              }];
-            } else {
-              currentProducts = [];
-            }
-           } else {
-             currentProducts = [];
-           }
-        } else {
-          // If a product is selected but no color, show the base product
-          const baseProduct = allProducts.find(p => p.id === productId);
-          currentProducts = baseProduct ? [baseProduct] : [];
+        const baseProduct = allProducts.find(p => p.id === productId);
+        if (!baseProduct) return [];
+
+        let productOption;
+
+        if (selectedColor && selectedClosureType) {
+           productOption = allOptions.find(option => 
+            option.product_id === productId && 
+            option.color === selectedColor &&
+            option.closure_type === selectedClosureType
+          );
+        } else if (selectedColor) {
+           productOption = allOptions.find(option => 
+            option.product_id === productId && 
+            option.color === selectedColor
+          );
+        } else if (selectedClosureType) {
+           productOption = allOptions.find(option => 
+            option.product_id === productId && 
+            option.closure_type === selectedClosureType
+          );
         }
+
+        if (productOption) {
+          currentProducts = [{
+            ...baseProduct,
+            color_name: productOption.color,
+            color_hex: productOption.color_hex,
+            size: productOption.size,
+            closure_type: productOption.closure_type,
+          }];
+        } else {
+          // If a product is selected but no variant, show the base product
+          currentProducts = [baseProduct];
+        }
+
       } else {
         currentProducts = [];
       }
-    } else if (selectedColor) {
-      // This case should ideally not happen without a product selected, but as a fallback:
-      const productIds = new Set(allOptions.filter(o => o.color === selectedColor).map(o => o.product_id));
-      currentProducts = allProducts.filter(p => productIds.has(p.id));
     }
 
-
     return currentProducts;
-  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedColor]);
+  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedColor, selectedClosureType]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedProduct('');
     setSelectedColor('');
+    setSelectedClosureType('');
     setAvailableColors([]);
+    setAvailableClosureTypes([]);
   };
 
   return (
@@ -119,6 +136,9 @@ export default function Home() {
         selectedColor={selectedColor}
         onColorChange={setSelectedColor}
         availableColors={availableColors}
+        selectedClosureType={selectedClosureType}
+        onClosureTypeChange={setSelectedClosureType}
+        availableClosureTypes={availableClosureTypes}
         onClearFilters={handleClearFilters}
         products={allProducts}
       />

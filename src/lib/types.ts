@@ -15,6 +15,7 @@ export interface Product {
   image_url: string;
   variations?: string; // Adding variations
   size?: string; // Adding size for representative display
+  closure_type?: string;
 }
 
 export interface ProductOption {

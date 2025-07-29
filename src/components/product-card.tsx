@@ -2,7 +2,7 @@ import type { Product } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Droplet, Zap, TestTube2 } from 'lucide-react';
+import { Layers, Droplet, Zap, TestTube2, Lock } from 'lucide-react';
 import { VialIcon } from './vial-icon';
 
 interface ProductCardProps {
@@ -23,9 +23,10 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-lg font-semibold mb-1">{product.name}</CardTitle>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2 flex-wrap">
           <span className='flex items-center'><TestTube2 className="inline-block mr-1 h-4 w-4" />{product.size}</span>
           {product.color_name && <span className='flex items-center'><Droplet className="inline-block mr-1 h-4 w-4" />{product.color_name}</span>}
+          {product.closure_type && <span className='flex items-center'><Lock className="inline-block mr-1 h-4 w-4" />{product.closure_type}</span>}
         </div>
         <p className="mt-2 text-sm text-foreground/80 line-clamp-2">{product.description || 'No description available.'}</p>
       </CardContent>
