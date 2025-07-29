@@ -4,17 +4,14 @@ import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { FilterOptions, Product } from '@/lib/types';
+import type { Product } from '@/lib/types';
 
 interface FilterBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   selectedProduct: string;
   onProductChange: (value: string) => void;
-  selectedSize: string;
-  onSizeChange: (value: string) => void;
   onClearFilters: () => void;
-  filterOptions: FilterOptions;
   products: Product[];
 }
 
@@ -23,17 +20,14 @@ export function FilterBar({
   onSearchChange,
   selectedProduct,
   onProductChange,
-  selectedSize,
-  onSizeChange,
   onClearFilters,
-  filterOptions,
   products
 }: FilterBarProps) {
   const productNames = [...new Set(products.map((p) => p.name))];
   
   return (
     <div className="mb-8 p-4 bg-card rounded-lg shadow-sm border">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -44,7 +38,7 @@ export function FilterBar({
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-muted-foreground">Product</label>
+          <label className="text-sm font-medium text-muted-foreground">Product Name</label>
           <Select value={selectedProduct} onValueChange={onProductChange}>
             <SelectTrigger>
               <SelectValue placeholder="All Products" />
@@ -53,21 +47,6 @@ export function FilterBar({
               {productNames.map((name) => (
                 <SelectItem key={name} value={name}>
                   {name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="text-sm font-medium text-muted-foreground">Size</label>
-          <Select value={selectedSize} onValueChange={onSizeChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="All Sizes" />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.sizes.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
                 </SelectItem>
               ))}
             </SelectContent>
