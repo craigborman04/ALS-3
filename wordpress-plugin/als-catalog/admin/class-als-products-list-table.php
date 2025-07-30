@@ -31,9 +31,9 @@ class Als_Products_List_Table extends WP_List_Table {
 
         $query = $wpdb->prepare($sql, $per_page, ($page_number - 1) * $per_page);
         
-        als_log("Products List Table Query: " . $query);
+        als_catalog_log("Products List Table Query: " . $query);
         $result = $wpdb->get_results( $query, 'ARRAY_A' );
-        als_log("Products List Table Results: " . print_r($result, true));
+        als_catalog_log("Products List Table Results: " . print_r($result, true));
         
         return $result;
     }
@@ -101,6 +101,6 @@ class Als_Products_List_Table extends WP_List_Table {
             'per_page'    => $per_page
         ] );
         $this->items = self::get_products( $per_page, $current_page );
-        als_log("Prepared items for products list table: " . print_r($this->items, true));
+        als_catalog_log("Prepared items for products list table: " . print_r($this->items, true));
     }
 }

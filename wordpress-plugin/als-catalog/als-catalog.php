@@ -16,14 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
 
-if (!function_exists('als_log')) {
+if (!function_exists('als_catalog_log')) {
     /**
-     * A simple logger function for debugging.
-     * Writes to the /wp-content/debug.log file.
-     * WP_DEBUG and WP_DEBUG_LOG must be enabled in wp-config.php.
+     * A unique logger function for this plugin.
      */
-    function als_log($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG === true) {
+    function als_catalog_log($message) {
+        if (defined('WP_DEBUG') && WP_DEBUG === true && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG === true) {
             if (is_array($message) || is_object($message)) {
                 error_log(print_r($message, true));
             } else {
@@ -32,7 +30,6 @@ if (!function_exists('als_log')) {
         }
     }
 }
-
 
 // Define plugin constants
 define( 'ALS_CATALOG_VERSION', '1.0.0' );
