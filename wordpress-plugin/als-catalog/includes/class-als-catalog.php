@@ -107,7 +107,6 @@ class Als_Catalog {
      */
     private function define_public_hooks() {
         add_shortcode( 'als_product_catalog', array( $this, 'render_product_catalog_shortcode' ) );
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_react_app' ) );
     }
 
     /**
@@ -131,58 +130,14 @@ class Als_Catalog {
     }
     
     /**
-     * Render the product catalog shortcode.
+     * Render the product catalog shortcode using an iframe.
      *
      * @since    1.0.0
      */
     public function render_product_catalog_shortcode( $atts ) {
-        return '<div id="root"></div>';
+        $iframe_src = ALS_CATALOG_URL . 'out/index.html';
+        return '<iframe src="' . esc_url($iframe_src) . '" style="width: 100%; height: 1200px; border: none;"></iframe>';
     }
-    
-    /**
-     * Enqueue the React app's scripts and styles if the shortcode is present.
-     *
-     * @since    1.0.0
-     */
-    public function enqueue_react_app() {
-        global $post;
-        if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'als_product_catalog' ) ) {
-            // Corrected path to the asset manifest
-            $asset_manifest_path = ALS_CATALOG_DIR . 'out/_next/static/asset-manifest.json';
-            
-            if (file_exists($asset_manifest_path)) {
-                $asset_manifest = json_decode( file_get_contents( $asset_manifest_path ), true );
-                
-                // Enqueue all JS files listed in the entrypoints
-                if (isset($asset_manifest['entrypoints'])) {
-                    foreach ($asset_manifest['entrypoints'] as $entry) {
-                        if (substr($entry, -3) === '.js') {
-                            wp_enqueue_script(
-                                'als-catalog-react-app-' . basename($entry, '.js'),
-                                ALS_CATALOG_URL . 'out/_next/static/' . $entry,
-                                [],
-                                null,
-                                true
-                            );
-                        }
-                    }
-                }
-                
-                // Enqueue all CSS files listed in the entrypoints
-                 if (isset($asset_manifest['entrypoints'])) {
-                    foreach ($asset_manifest['entrypoints'] as $entry) {
-                         if (substr($entry, -4) === '.css') {
-                            wp_enqueue_style(
-                                'als-catalog-react-app-styles-' . basename($entry, '.css'),
-                                ALS_CATALOG_URL . 'out/_next/static/' . $entry
-                            );
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     /**
      * Run the loader to execute all of the hooks with WordPress.
@@ -208,6 +163,8 @@ class Als_Catalog {
      * @since    1.0.0
      */
     public function deactivate() {
+        // Tables are no longer dropped on deactivation to preserve data.
+        /*
         global $wpdb;
         $tables = [
             $wpdb->prefix . 'als_catalog_products',
@@ -219,6 +176,7 @@ class Als_Catalog {
         foreach ($tables as $table) {
             $wpdb->query("DROP TABLE IF EXISTS $table");
         }
+        */
     }
 
 
