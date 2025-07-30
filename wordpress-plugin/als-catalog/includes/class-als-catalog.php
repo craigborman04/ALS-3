@@ -59,7 +59,7 @@ class Als_Catalog {
     public function __construct() {
 
         $this->plugin_name = 'als-catalog';
-        $this.version = ALS_CATALOG_VERSION;
+        $this->version = ALS_CATALOG_VERSION;
 
         $this->load_dependencies();
         $this->define_admin_hooks();
