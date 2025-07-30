@@ -237,8 +237,8 @@ class Als_Catalog {
             tags TEXT NULL,
             is_active TINYINT(1) DEFAULT 1 NOT NULL,
             sort_order INT(11) DEFAULT 0 NOT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
             slug VARCHAR(255) NULL,
             description TEXT NULL,
             image_url VARCHAR(255) NULL,
@@ -262,8 +262,8 @@ class Als_Catalog {
             dimensions VARCHAR(255) NULL,
             weight VARCHAR(255) NULL,
             is_active TINYINT(1) DEFAULT 1 NOT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
             PRIMARY KEY (id),
             KEY product_id (product_id)
         ) $charset_collate;";
@@ -289,8 +289,8 @@ class Als_Catalog {
             company_name VARCHAR(255) NULL,
             message TEXT NULL,
             status VARCHAR(50) DEFAULT 'pending' NOT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
             PRIMARY KEY (id)
         ) $charset_collate;";
         dbDelta( $sql );
@@ -301,8 +301,9 @@ class Als_Catalog {
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL UNIQUE,
             description TEXT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
+            is_active TINYINT(1) DEFAULT 1 NOT NULL,
+            sort_order INT(11) DEFAULT 0 NOT NULL,
+            created_at DATETIME NULL,
             PRIMARY KEY (id)
         ) $charset_collate;";
         dbDelta( $sql );
@@ -311,11 +312,15 @@ class Als_Catalog {
         $table_name = $wpdb->prefix . 'als_catalog_currencies';
         $sql = "CREATE TABLE $table_name (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            code VARCHAR(10) NOT NULL UNIQUE,
-            name VARCHAR(255) NOT NULL,
-            symbol VARCHAR(10) NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL,
+            currency_code VARCHAR(10) NOT NULL UNIQUE,
+            currency_name VARCHAR(255) NOT NULL,
+            currency_symbol VARCHAR(10) NULL,
+            exchange_rate DECIMAL(10,4) NULL,
+            is_default TINYINT(1) DEFAULT 0 NOT NULL,
+            is_active TINYINT(1) DEFAULT 1 NOT NULL,
+            last_updated DATETIME NULL,
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
             PRIMARY KEY (id)
         ) $charset_collate;";
         dbDelta( $sql );
@@ -330,15 +335,14 @@ class Als_Catalog {
         global $wpdb;
 
         $csv_files = [
+            'currencies'    => [ 'file' => 'wp_als_currencies.csv', 'table' => $wpdb->prefix . 'als_catalog_currencies' ],
+            'closure_types' => [ 'file' => 'wp_als_closure_types.csv', 'table' => $wpdb->prefix . 'als_catalog_closure_types' ],
             'products'      => [ 'file' => 'wp_als_products.csv', 'table' => $wpdb->prefix . 'als_catalog_products' ],
             'product_options' => [ 'file' => 'wp_als_product_options_simple.csv', 'table' => $wpdb->prefix . 'als_catalog_product_options' ],
             'quotes'        => [ 'file' => 'wp_als_quotes_simple.csv', 'table' => $wpdb->prefix . 'als_catalog_quotes' ],
-            'closure_types' => [ 'file' => 'wp_als_closure_types.csv', 'table' => $wpdb->prefix . 'als_catalog_closure_types' ],
-            'currencies'    => [ 'file' => 'wp_als_currencies.csv', 'table' => $wpdb->prefix . 'als_catalog_currencies' ],
         ];
 
         foreach ( $csv_files as $key => $info ) {
-            // The CSVs must be inside a /data/ folder within the plugin directory.
             $file_path = ALS_CATALOG_DIR . 'data/' . $info['file'];
             $table_name = $info['table'];
 
@@ -347,14 +351,13 @@ class Als_Catalog {
                 continue;
             }
             
-            // Fixed check: Only import if the table is empty.
             $count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
             if ($count > 0) {
                 continue;
             }
 
             if ( ( $handle = fopen( $file_path, 'r' ) ) !== FALSE ) {
-                $header = fgetcsv( $handle ); // Get header row
+                $header = fgetcsv( $handle ); 
 
                 while ( ( $data = fgetcsv( $handle ) ) !== FALSE ) {
                     if ( count( $header ) !== count( $data ) ) {
@@ -363,61 +366,20 @@ class Als_Catalog {
                     }
 
                     $row_data = array_combine( $header, $data );
-                    $insert_data = [];
-                    $format = [];
 
-                    foreach ( $row_data as $col_name => $col_value ) {
-                        switch ( $col_name ) {
-                            case 'id':
-                            case 'product_id':
-                            case 'quantity':
-                            case 'box_quantity':
-                            case 'sort_order':
-                                $insert_data[ $col_name ] = absint( $col_value );
-                                $format[] = '%d';
-                                break;
-                            case 'unit_price':
-                            case 'total_price':
-                            case 'price_modifier':
-                                $insert_data[ $col_name ] = sanitize_text_field( $col_value );
-                                $format[] = '%f';
-                                break;
-                            case 'is_active':
-                                $insert_data[ $col_name ] = (int) $col_value;
-                                $format[] = '%d';
-                                break;
-                            case 'created_at':
-                            case 'updated_at':
-                                $insert_data[ $col_name ] = sanitize_text_field( $col_value );
-                                $format[] = '%s';
-                                break;
-                            case 'message':
-                            case 'description':
-                            case 'color_description':
-                            case 'tags':
-                                $insert_data[ $col_name ] = sanitize_textarea_field( $col_value );
-                                $format[] = '%s';
-                                break;
-                            case 'customer_email':
-                                $insert_data[ $col_name ] = sanitize_email( $col_value );
-                                $format[] = '%s';
-                                break;
-                            case 'image_url':
-                                $insert_data[ $col_name ] = esc_url_raw( $col_value );
-                                $format[] = '%s';
-                                break;
-                            case 'slug':
-                                $insert_data[ $col_name ] = sanitize_title( $col_value );
-                                $format[] = '%s';
-                                break;
-                            default:
-                                $insert_data[ $col_name ] = sanitize_text_field( $col_value );
-                                $format[] = '%s';
-                                break;
-                        }
+                    // Auto-generate slug for products if it's empty
+                    if ($key === 'products' && empty($row_data['slug'])) {
+                        $row_data['slug'] = sanitize_title($row_data['name']);
+                    }
+                    
+                    $insert_data = [];
+                    foreach ($row_data as $col_name => $col_value) {
+                         // Sanitize all values as strings, as $wpdb->insert handles the rest based on format.
+                        $insert_data[$col_name] = sanitize_text_field($col_value);
                     }
 
-                    $wpdb->insert( $table_name, $insert_data, $format );
+
+                    $wpdb->insert( $table_name, $insert_data );
 
                     if ( $wpdb->last_error ) {
                         error_log( "ALS Catalog: Error inserting into $table_name: " . $wpdb->last_error );
