@@ -136,9 +136,7 @@ class Als_Catalog {
      * @since    1.0.0
      */
     public function render_product_catalog_shortcode( $atts ) {
-        // This is where you would enqueue your React app's scripts and styles.
-        // For now, it will be a simple placeholder.
-        return '<div id="als-product-catalog-root"></div>';
+        return '<div id="root"></div>';
     }
     
     /**
@@ -149,27 +147,37 @@ class Als_Catalog {
     public function enqueue_react_app() {
         global $post;
         if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'als_product_catalog' ) ) {
-            $asset_manifest_path = ALS_CATALOG_DIR . 'react-app/out/_next/static/asset-manifest.json';
+            // Corrected path to the asset manifest
+            $asset_manifest_path = ALS_CATALOG_DIR . 'out/_next/static/asset-manifest.json';
+            
             if (file_exists($asset_manifest_path)) {
                 $asset_manifest = json_decode( file_get_contents( $asset_manifest_path ), true );
                 
-                // Enqueue main JS
-                if (isset($asset_manifest['main.js'])) {
-                    wp_enqueue_script(
-                        'als-catalog-react-app',
-                        ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.js'],
-                        [],
-                        null,
-                        true
-                    );
+                // Enqueue all JS files listed in the entrypoints
+                if (isset($asset_manifest['entrypoints'])) {
+                    foreach ($asset_manifest['entrypoints'] as $entry) {
+                        if (substr($entry, -3) === '.js') {
+                            wp_enqueue_script(
+                                'als-catalog-react-app-' . basename($entry, '.js'),
+                                ALS_CATALOG_URL . 'out/_next/static/' . $entry,
+                                [],
+                                null,
+                                true
+                            );
+                        }
+                    }
                 }
                 
-                // Enqueue main CSS
-                 if (isset($asset_manifest['main.css'])) {
-                    wp_enqueue_style(
-                        'als-catalog-react-app-styles',
-                        ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.css']
-                    );
+                // Enqueue all CSS files listed in the entrypoints
+                 if (isset($asset_manifest['entrypoints'])) {
+                    foreach ($asset_manifest['entrypoints'] as $entry) {
+                         if (substr($entry, -4) === '.css') {
+                            wp_enqueue_style(
+                                'als-catalog-react-app-styles-' . basename($entry, '.css'),
+                                ALS_CATALOG_URL . 'out/_next/static/' . $entry
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -343,6 +351,7 @@ class Als_Catalog {
         ];
 
         foreach ( $csv_files as $key => $info ) {
+            // The CSVs must be inside a /data/ folder within the plugin directory.
             $file_path = ALS_CATALOG_DIR . 'data/' . $info['file'];
             $table_name = $info['table'];
 
@@ -351,6 +360,7 @@ class Als_Catalog {
                 continue;
             }
             
+            // Fixed check: Only import if the table is empty.
             $count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
             if ($count > 0) {
                 continue;
