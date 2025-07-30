@@ -63,7 +63,6 @@ class Als_Catalog_Rest_Api {
         global $wpdb;
         $table_name = $wpdb->prefix . 'als_catalog_products';
         
-        // We'll add filtering logic here later based on request params
         $query = "SELECT * FROM {$table_name} WHERE is_active = 1 ORDER BY sort_order ASC";
         $results = $wpdb->get_results( $query );
 

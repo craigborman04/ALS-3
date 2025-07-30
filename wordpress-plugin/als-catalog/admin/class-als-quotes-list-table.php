@@ -15,18 +15,22 @@ class Als_Quotes_List_Table extends WP_List_Table {
 
     public static function get_quotes( $per_page = 20, $page_number = 1 ) {
         global $wpdb;
-
-        $sql = "SELECT * FROM {$wpdb->prefix}als_catalog_quotes";
+        $table_name = $wpdb->prefix . 'als_catalog_quotes';
+        
+        $sql = "SELECT * FROM {$table_name}";
          if ( ! empty( $_REQUEST['orderby'] ) ) {
             $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
             $sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
         } else {
              $sql .= " ORDER BY created_at DESC";
         }
-        $sql .= " LIMIT $per_page";
-        $sql .= " OFFSET " . ( $page_number - 1 ) * $per_page;
 
-        return $wpdb->get_results( $sql, 'ARRAY_A' );
+        $sql .= " LIMIT %d";
+        $sql .= " OFFSET %d";
+        
+        $query = $wpdb->prepare($sql, $per_page, ($page_number - 1) * $per_page);
+
+        return $wpdb->get_results( $query, 'ARRAY_A' );
     }
 
     public static function record_count() {
