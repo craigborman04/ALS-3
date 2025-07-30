@@ -64,6 +64,9 @@ class Als_Catalog {
         $this->load_dependencies();
         $this->define_admin_hooks();
         $this->define_public_hooks();
+        
+        // Add deactivation hook
+        register_deactivation_hook( ALS_CATALOG_DIR . 'als-catalog.php', array( $this, 'deactivate' ) );
 
     }
 
@@ -133,6 +136,8 @@ class Als_Catalog {
      * @since    1.0.0
      */
     public function render_product_catalog_shortcode( $atts ) {
+        // This is where you would enqueue your React app's scripts and styles.
+        // For now, it will be a simple placeholder.
         return '<div id="als-product-catalog-root"></div>';
     }
     
@@ -144,25 +149,28 @@ class Als_Catalog {
     public function enqueue_react_app() {
         global $post;
         if ( is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'als_product_catalog' ) ) {
-            $asset_manifest = json_decode( file_get_contents( ALS_CATALOG_DIR . 'react-app/out/_next/static/asset-manifest.json' ), true );
-            
-            // Enqueue main JS
-            if (isset($asset_manifest['main.js'])) {
-                wp_enqueue_script(
-                    'als-catalog-react-app',
-                    ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.js'],
-                    [],
-                    null,
-                    true
-                );
-            }
-            
-            // Enqueue main CSS
-             if (isset($asset_manifest['main.css'])) {
-                wp_enqueue_style(
-                    'als-catalog-react-app-styles',
-                    ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.css']
-                );
+            $asset_manifest_path = ALS_CATALOG_DIR . 'react-app/out/_next/static/asset-manifest.json';
+            if (file_exists($asset_manifest_path)) {
+                $asset_manifest = json_decode( file_get_contents( $asset_manifest_path ), true );
+                
+                // Enqueue main JS
+                if (isset($asset_manifest['main.js'])) {
+                    wp_enqueue_script(
+                        'als-catalog-react-app',
+                        ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.js'],
+                        [],
+                        null,
+                        true
+                    );
+                }
+                
+                // Enqueue main CSS
+                 if (isset($asset_manifest['main.css'])) {
+                    wp_enqueue_style(
+                        'als-catalog-react-app-styles',
+                        ALS_CATALOG_URL . 'react-app/out/_next/static/' . $asset_manifest['main.css']
+                    );
+                }
             }
         }
     }
@@ -185,6 +193,26 @@ class Als_Catalog {
         $this->create_als_tables();
         $this->import_csv_data();
     }
+    
+    /**
+     * Fired during plugin deactivation.
+     * This will clean up the database tables.
+     * @since    1.0.0
+     */
+    public function deactivate() {
+        global $wpdb;
+        $tables = [
+            $wpdb->prefix . 'als_catalog_products',
+            $wpdb->prefix . 'als_catalog_product_options',
+            $wpdb->prefix . 'als_catalog_quotes',
+            $wpdb->prefix . 'als_catalog_closure_types',
+            $wpdb->prefix . 'als_catalog_currencies',
+        ];
+        foreach ($tables as $table) {
+            $wpdb->query("DROP TABLE IF EXISTS $table");
+        }
+    }
+
 
     /**
      * Create custom database tables for ALS Catalog.
@@ -318,15 +346,15 @@ class Als_Catalog {
                 error_log( "ALS Catalog: CSV file not found at " . $file_path );
                 continue;
             }
+            
+            // Fixed check: Only import if the table is empty.
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+            if ($count > 0) {
+                continue;
+            }
 
             if ( ( $handle = fopen( $file_path, 'r' ) ) !== FALSE ) {
                 $header = fgetcsv( $handle ); // Get header row
-                
-                $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-                if ($wpdb->num_rows > 0) {
-                    fclose($handle);
-                    continue; // Skip if table already has data
-                }
 
                 while ( ( $data = fgetcsv( $handle ) ) !== FALSE ) {
                     if ( count( $header ) !== count( $data ) ) {
