@@ -63,10 +63,14 @@ class Als_Catalog_Rest_Api {
         global $wpdb;
         $table_name = $wpdb->prefix . 'als_catalog_products';
         
+        als_log("REST API: Fetching products.");
         $query = "SELECT * FROM {$table_name} WHERE is_active = 1 ORDER BY sort_order ASC";
         $results = $wpdb->get_results( $query );
+        als_log("REST API: Products query results: " . print_r($results, true));
+
 
         if ( $wpdb->last_error ) {
+            als_log("REST API: DB Error fetching products: " . $wpdb->last_error);
             return new WP_Error( 'db_error', __( 'Could not retrieve products.', 'als-catalog' ), array( 'status' => 500 ) );
         }
 
@@ -82,7 +86,8 @@ class Als_Catalog_Rest_Api {
     public function get_filter_options( $request ) {
         global $wpdb;
         $options_table = $wpdb->prefix . 'als_catalog_product_options';
-
+        
+        als_log("REST API: Fetching filter options.");
         $sizes = $wpdb->get_col("SELECT DISTINCT size FROM {$options_table} WHERE size IS NOT NULL AND size != '' ORDER BY size ASC");
         $colors = $wpdb->get_col("SELECT DISTINCT color FROM {$options_table} WHERE color IS NOT NULL AND color != '' ORDER BY color ASC");
         $closure_types = $wpdb->get_col("SELECT DISTINCT closure_type FROM {$options_table} WHERE closure_type IS NOT NULL AND closure_type != '' ORDER BY closure_type ASC");
@@ -92,6 +97,8 @@ class Als_Catalog_Rest_Api {
             'colors' => $colors,
             'closureTypes' => $closure_types,
         ];
+        
+        als_log("REST API: Filter options query results: " . print_r($response, true));
         
         return new WP_REST_Response( $response, 200 );
     }
@@ -128,9 +135,11 @@ class Als_Catalog_Rest_Api {
         $result = $wpdb->insert( $table_name, $data );
 
         if ( $result === false ) {
+            als_log("REST API: Error creating quote: " . $wpdb->last_error);
             return new WP_Error( 'db_error', __( 'Could not save the quote.', 'als-catalog' ), array( 'status' => 500 ) );
         }
 
+        als_log("REST API: Successfully created quote. ID: " . $wpdb->insert_id);
         // Send email notification
         $this->send_quote_notification_email( $data );
 
@@ -158,7 +167,8 @@ class Als_Catalog_Rest_Api {
 
         $headers = array('Content-Type: text/html; charset=UTF-8');
 
-        wp_mail( $to, $subject, $body, $headers );
+        $mail_sent = wp_mail( $to, $subject, $body, $headers );
+        als_log("Email notification sent to {$to}. Success: " . ($mail_sent ? 'Yes' : 'No'));
     }
     
     /**
@@ -173,9 +183,11 @@ class Als_Catalog_Rest_Api {
         $results = $wpdb->get_results( "SELECT * FROM {$table_name} ORDER BY created_at DESC" );
         
         if ( $wpdb->last_error ) {
+            als_log("REST API: DB Error fetching quotes: " . $wpdb->last_error);
             return new WP_Error( 'db_error', __( 'Could not retrieve quotes.', 'als-catalog' ), array( 'status' => 500 ) );
         }
-
+        
+        als_log("REST API: Quotes query results: " . print_r($results, true));
         return new WP_REST_Response( $results, 200 );
     }
     

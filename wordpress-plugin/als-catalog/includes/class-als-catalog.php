@@ -59,7 +59,7 @@ class Als_Catalog {
     public function __construct() {
 
         $this->plugin_name = 'als-catalog';
-        $this->version = ALS_CATALOG_VERSION;
+        $this.version = ALS_CATALOG_VERSION;
 
         $this->load_dependencies();
         $this->define_admin_hooks();
@@ -135,7 +135,11 @@ class Als_Catalog {
      * @since    1.0.0
      */
     public function render_product_catalog_shortcode( $atts ) {
-        $iframe_src = ALS_CATALOG_URL . 'out/index.html';
+        // Pass the REST API URL to the iframe via a query parameter
+        $iframe_src = add_query_arg(
+            ['apiUrl' => rest_url('als-catalog/v1/')],
+            ALS_CATALOG_URL . 'out/index.html'
+        );
         return '<iframe src="' . esc_url($iframe_src) . '" style="width: 100%; height: 1200px; border: none;"></iframe>';
     }
 
@@ -164,19 +168,6 @@ class Als_Catalog {
      */
     public function deactivate() {
         // Tables are no longer dropped on deactivation to preserve data.
-        /*
-        global $wpdb;
-        $tables = [
-            $wpdb->prefix . 'als_catalog_products',
-            $wpdb->prefix . 'als_catalog_product_options',
-            $wpdb->prefix . 'als_catalog_quotes',
-            $wpdb->prefix . 'als_catalog_closure_types',
-            $wpdb->prefix . 'als_catalog_currencies',
-        ];
-        foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS $table");
-        }
-        */
     }
 
 

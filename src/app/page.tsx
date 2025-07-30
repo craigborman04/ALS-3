@@ -6,8 +6,15 @@ import { FilterBar } from '../components/filter-bar';
 import { CardSkeleton } from '../components/card-skeleton';
 import { Product, ProductOption, FilterOptions } from '../lib/types';
 
-// WordPress API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://your-wordpress-site.com/wp-json';
+// This function will extract the API URL from the iframe's query parameters
+const getApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('apiUrl') || '/wp-json/als-catalog/v1';
+  }
+  return '/wp-json/als-catalog/v1';
+};
+
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -24,10 +31,11 @@ export default function Home() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      const API_URL = getApiUrl();
       try {
         const [productsRes, filterOptionsRes] = await Promise.all([
-          fetch(`${API_URL}/als-catalog/v1/products`),
-          fetch(`${API_URL}/als-catalog/v1/filter-options`),
+          fetch(`${API_URL}products`),
+          fetch(`${API_URL}filter-options`),
         ]);
 
         if (!productsRes.ok || !filterOptionsRes.ok) {
