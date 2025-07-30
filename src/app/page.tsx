@@ -6,7 +6,8 @@ import { FilterBar } from '../components/filter-bar';
 import { CardSkeleton } from '../components/card-skeleton';
 import { Product, ProductOption, FilterOptions } from '../lib/types';
 
-import { fetchMockProducts } from '../lib/mock-data';
+// WordPress API URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://your-wordpress-site.com/wp-json';
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -14,50 +15,40 @@ export default function Home() {
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Filter states
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
-  const [selectedClosureType, setSelectedClosureType] = useState<string>('');
-  
-  const [availableColors, setAvailableColors] = useState<string[]>([]);
-  const [availableClosureTypes, setAvailableClosureTypes] = useState<string[]>([]);
+  const [selectedClosure, setSelectedClosure] = useState<string>('');
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
-        console.log('Using mock data...');
-        const data = await fetchMockProducts();
-        setAllProducts(data.products);
-        setAllOptions(data.options);
-        setFilterOptions(data.filterOptions);
+        const [productsRes, filterOptionsRes] = await Promise.all([
+          fetch(`${API_URL}/als-catalog/v1/products`),
+          fetch(`${API_URL}/als-catalog/v1/filter-options`),
+        ]);
+
+        if (!productsRes.ok || !filterOptionsRes.ok) {
+          throw new Error('Failed to fetch data from the API');
+        }
+
+        const productsData = await productsRes.json();
+        const filterOptionsData = await filterOptionsRes.json();
+        
+        setAllProducts(productsData);
+        setFilterOptions(filterOptionsData);
+
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadProducts();
+    loadData();
   }, []);
-
-  useEffect(() => {
-    if (selectedProduct) {
-      const productId = allProducts.find(p => p.name === selectedProduct)?.id;
-      if (productId) {
-        const productOptions = allOptions.filter(option => option.product_id === productId);
-        const colors = productOptions.map(option => option.color).filter(Boolean);
-        const closureTypes = productOptions.map(option => option.closure_type).filter(Boolean);
-        setAvailableColors([...new Set(colors)]);
-        setAvailableClosureTypes([...new Set(closureTypes)]);
-      }
-    } else {
-      setAvailableColors([]);
-      setAvailableClosureTypes([]);
-    }
-    setSelectedColor('');
-    setSelectedClosureType('');
-  }, [selectedProduct, allProducts, allOptions]);
 
   const filteredProducts = useMemo(() => {
     let currentProducts = allProducts;
@@ -67,63 +58,32 @@ export default function Home() {
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (selectedProduct) {
-      const productId = allProducts.find(p => p.name === selectedProduct)?.id;
-      
-      if (productId) {
-        const baseProduct = allProducts.find(p => p.id === productId);
-        if (!baseProduct) return [];
-
-        let productOption;
-
-        if (selectedColor && selectedClosureType) {
-           productOption = allOptions.find(option => 
-            option.product_id === productId && 
-            option.color === selectedColor &&
-            option.closure_type === selectedClosureType
-          );
-        } else if (selectedColor) {
-           productOption = allOptions.find(option => 
-            option.product_id === productId && 
-            option.color === selectedColor
-          );
-        } else if (selectedClosureType) {
-           productOption = allOptions.find(option => 
-            option.product_id === productId && 
-            option.closure_type === selectedClosureType
-          );
-        }
-
-        if (productOption) {
-          currentProducts = [{
-            ...baseProduct,
-            color_name: productOption.color,
-            color_hex: productOption.color_hex,
-            size: productOption.size,
-            closure_type: productOption.closure_type,
-          }];
-        } else {
-          // If a product is selected but no variant, show the base product
-          currentProducts = [baseProduct];
-        }
-
-      } else {
-        currentProducts = [];
-      }
+      currentProducts = currentProducts.filter(product => product.name === selectedProduct);
     }
 
     return currentProducts;
-  }, [allProducts, allOptions, searchTerm, selectedProduct, selectedColor, selectedClosureType]);
+  }, [allProducts, searchTerm, selectedProduct]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedProduct('');
     setSelectedColor('');
-    setSelectedClosureType('');
-    setAvailableColors([]);
-    setAvailableClosureTypes([]);
+    setSelectedClosure('');
   };
+
+  const { availableColors, availableClosureTypes } = useMemo(() => {
+    if (!selectedProduct) {
+      return { availableColors: [], availableClosureTypes: [] };
+    }
+    const optionsForSelectedProduct = allOptions.filter(
+      (option) => option.product_id === allProducts.find(p => p.name === selectedProduct)?.id
+    );
+    const colors = [...new Set(optionsForSelectedProduct.map(o => o.color).filter(Boolean))];
+    const closures = [...new Set(optionsForSelectedProduct.map(o => o.closure_type).filter(Boolean))];
+    return { availableColors: colors, availableClosureTypes: closures };
+  }, [selectedProduct, allProducts, allOptions]);
 
   return (
     <main className="min-h-screen bg-gray-100 p-4">
@@ -132,22 +92,22 @@ export default function Home() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         selectedProduct={selectedProduct}
-        onProductChange={setSelectedProduct}
+        onProductChange={(product) => {
+          setSelectedProduct(product);
+          setSelectedColor('');
+          setSelectedClosure('');
+        }}
         selectedColor={selectedColor}
         onColorChange={setSelectedColor}
         availableColors={availableColors}
-        selectedClosureType={selectedClosureType}
-        onClosureTypeChange={setSelectedClosureType}
+        selectedClosureType={selectedClosure}
+        onClosureTypeChange={setSelectedClosure}
         availableClosureTypes={availableClosureTypes}
         onClearFilters={handleClearFilters}
         products={allProducts}
       />
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
+        <CardSkeleton />
       ) : (
         <ProductGrid products={filteredProducts} isLoading={loading} />
       )}

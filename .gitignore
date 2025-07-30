@@ -2,9 +2,9 @@
 /node_modules
 
 # Build files
-/dist
+# /out/  <- We are intentionally NOT ignoring this for now
+/dist/
 /.next/
-/out/
 
 # Log files
 npm-debug.log*
