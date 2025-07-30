@@ -17,12 +17,16 @@ class Als_Quotes_List_Table extends WP_List_Table {
         global $wpdb;
 
         $sql = "SELECT * FROM {$wpdb->prefix}als_catalog_quotes";
-        $sql .= " ORDER BY created_at DESC";
+         if ( ! empty( $_REQUEST['orderby'] ) ) {
+            $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
+            $sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
+        } else {
+             $sql .= " ORDER BY created_at DESC";
+        }
         $sql .= " LIMIT $per_page";
         $sql .= " OFFSET " . ( $page_number - 1 ) * $per_page;
 
-        $result = $wpdb->get_results( $sql, 'ARRAY_A' );
-        return $result;
+        return $wpdb->get_results( $sql, 'ARRAY_A' );
     }
 
     public static function record_count() {
@@ -36,20 +40,15 @@ class Als_Quotes_List_Table extends WP_List_Table {
     }
 
     function column_default( $item, $column_name ) {
-        switch ( $column_name ) {
-            case 'product_name':
-            case 'customer_name':
-            case 'customer_email':
-            case 'status':
-            case 'created_at':
-                return $item[ $column_name ];
-            default:
-                return print_r( $item, true ); //Show the whole array for troubleshooting
+        if (isset($item[$column_name])) {
+            return esc_html($item[$column_name]);
         }
+        return 'N/A';
     }
     
     function column_product_name( $item ) {
-        $title = '<strong>' . $item['product_name'] . '</strong>';
+        $product_name = $item['product_name'] ?? 'No Product Name';
+        $title = '<strong>' . esc_html($product_name) . '</strong>';
         $actions = [
             'edit'   => sprintf( '<a href="?page=%s&action=%s&id=%s">Edit</a>', 'als-catalog-quote-manage', 'edit', absint( $item['id'] ) ),
             'view'   => sprintf( '<a href="?page=%s&action=%s&id=%s">View</a>', $_REQUEST['page'], 'view', absint( $item['id'] ) ),
@@ -59,7 +58,7 @@ class Als_Quotes_List_Table extends WP_List_Table {
     }
 
     function get_columns() {
-        $columns = [
+        return [
             'cb'            => '<input type="checkbox" />',
             'product_name'  => __( 'Product', 'als-catalog' ),
             'customer_name' => __( 'Customer', 'als-catalog' ),
@@ -67,37 +66,32 @@ class Als_Quotes_List_Table extends WP_List_Table {
             'status'        => __( 'Status', 'als-catalog' ),
             'created_at'    => __( 'Date', 'als-catalog' )
         ];
-        return $columns;
     }
 
     public function get_sortable_columns() {
-        $sortable_columns = array(
+        return [
             'product_name' => array( 'product_name', true ),
             'customer_name' => array( 'customer_name', true ),
             'status' => array( 'status', true ),
             'created_at' => array( 'created_at', true )
-        );
-        return $sortable_columns;
+        ];
     }
     
     function column_cb( $item ) {
         return sprintf(
-            '<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['id']
+            '<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['id'] ?? ''
         );
     }
 
     public function prepare_items() {
         $this->_column_headers = $this->get_column_info();
-
         $per_page     = $this->get_items_per_page( 'quotes_per_page', 20 );
         $current_page = $this->get_pagenum();
         $total_items  = self::record_count();
-
         $this->set_pagination_args( [
             'total_items' => $total_items,
             'per_page'    => $per_page
         ] );
-
         $this->items = self::get_quotes( $per_page, $current_page );
     }
 }
